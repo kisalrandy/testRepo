@@ -1,0 +1,15 @@
+### Eclipse Workspace Patch 1.0
+#P Core - Core Automation
+Index: src/com/enactor/core/automation/AUT/AUTConfig.java
+===================================================================
+--- src/com/enactor/core/automation/AUT/AUTConfig.java	(revision 1410336)
++++ src/com/enactor/core/automation/AUT/AUTConfig.java	(working copy)
+@@ -34,6 +34,8 @@
+     public static final String PROPERTY_DELIMETER = ",";
+     /** Aut controller server list **/
+     public static final String PROPERTY_AUT_LIST = "autList";
++    /** Test parameter for the end screen **/
++    public static final String PROPERTY_WINDOW_TO_CHECK = "windowToCheck";
+     /**
+      * Instance.
+      */

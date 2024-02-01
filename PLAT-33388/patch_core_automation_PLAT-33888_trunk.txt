@@ -1,0 +1,115 @@
+### Eclipse Workspace Patch 1.0
+#P POS - POS UI Tests
+Index: src/com/enactor/pos/web/embedded/EmbeddedChromiumBrowserStepsProvider.java
+===================================================================
+--- src/com/enactor/pos/web/embedded/EmbeddedChromiumBrowserStepsProvider.java	(revision 1416062)
++++ src/com/enactor/pos/web/embedded/EmbeddedChromiumBrowserStepsProvider.java	(working copy)
+@@ -1,5 +1,6 @@
+ package com.enactor.pos.web.embedded;
+ 
++import com.enactor.core.automation.AUT.AUTConfig;
+ import com.enactor.core.automation.AUT.AutomationException;
+ import com.enactor.core.automation.component.IComponentAccessor;
+ import com.enactor.core.automation.component.IWebBrowserAccessor;
+@@ -15,6 +16,7 @@
+     private static final String BROWSER_COMPONENT_DEFAULT_VALUE = "JSON_THIN_CLIENT";
+     private static final String POS_APPLICATION_WINDOW_KEY = "APPLICATION_WINDOW_PREFIX";
+     private static final String POS_APPLICATION_DEFAULT_VALUE = "Point-of-Sale Application";
++    private static AUTConfig config;
+ 
+     @Override
+     public void beforeTest() {
+@@ -22,7 +24,9 @@
+ 
+     @Override
+     public void afterTestCheckEnterUserScreenShown(String testName, boolean clearTestPrinter, boolean testFailed) throws Exception {
+-        try {
++    	config = AUTConfig.getInstance();
++    	String windowName = config.get(config.PROPERTY_WINDOW_TO_CHECK, ENTER_USER_WINDOW_NAME);
++    	try {
+             TRANSACTION_IDS.clear();
+             if (clearTestPrinter) {
+                 clearPrinter();
+@@ -30,7 +34,11 @@
+             if (testFailed) {
+                 failTest(testName);
+             }
+-            checkWindow(ENTER_USER_WINDOW_NAME);
++            if (windowName.equals(SCO_LANE_CLOSE_WINDOW_NAME)) {
++                checkWindow(SCO_LANE_CLOSE_WINDOW_NAME);
++            }else {
++            	checkWindow(ENTER_USER_WINDOW_NAME);
++            }
+         } catch (Exception e) {
+             restartApplication();
+         }
+Index: src/com/enactor/pos/web/WebPosStepsProvider.java
+===================================================================
+--- src/com/enactor/pos/web/WebPosStepsProvider.java	(revision 1416062)
++++ src/com/enactor/pos/web/WebPosStepsProvider.java	(working copy)
+@@ -1,6 +1,7 @@
+ package com.enactor.pos.web;
+ 
+ import com.enactor.core.application.process.IApplicationProcessDataType;
++import com.enactor.core.automation.AUT.AUTConfig;
+ import com.enactor.core.automation.AUT.AutomationException;
+ import com.enactor.core.automation.AUT.IAUTWebController;
+ import com.enactor.core.automation.selenium.SeleniumWebController;
+@@ -96,6 +97,8 @@
+ 	private static final String START_TEXT = "src=\"";
+ 	private static final String END_TEXT = ".html";
+ 	
++	private static AUTConfig config;
++	
+     protected IAUTWebController getWebController() {
+         return WEB_CONTROLLER;
+     }
+@@ -365,6 +368,8 @@
+ 
+     @Override
+     public void afterTestCheckEnterUserScreenShown(String testName, boolean clearTestPrinter, boolean testFailed) throws Exception {
++    	config = AUTConfig.getInstance();
++    	String windowName = config.get(config.PROPERTY_WINDOW_TO_CHECK, ENTER_USER_WINDOW_NAME);
+         try {
+             TRANSACTION_IDS.clear();
+             if (clearTestPrinter) {
+@@ -373,7 +378,11 @@
+             if (testFailed) {
+                 failTest(testName);
+             }
+-            checkWindow(ENTER_USER_WINDOW_NAME);
++            if (windowName.equals(SCO_LANE_CLOSE_WINDOW_NAME)) {
++                checkWindow(SCO_LANE_CLOSE_WINDOW_NAME);
++            }else {
++            	checkWindow(ENTER_USER_WINDOW_NAME);
++            }
+         } catch (Exception e) {
+             recoverApplication();
+         } finally {
+Index: src/com/enactor/pos/test/BaseStepsProvider.java
+===================================================================
+--- src/com/enactor/pos/test/BaseStepsProvider.java	(revision 1416062)
++++ src/com/enactor/pos/test/BaseStepsProvider.java	(working copy)
+@@ -45,6 +45,7 @@
+ 	protected static final String TRANSACTION_BASKET_WINDOW_NAME = "Transaction Basket";
+ 	protected static final String RECOVERY_WINDOW_NAME = "Recovery Window";
+     protected static final String ENTER_USER_WINDOW_NAME = "Enter User";
++    protected static final String SCO_LANE_CLOSE_WINDOW_NAME = "Sco Laneclose";
+     protected static final String ENT_BUTTON_LABEL = "ENT";
+ 
+     protected static final int WAITING_TIME_IN_MILLIS_HARD_RESTART = PosTestManager.getWaitingTimeForHardRestartInMillis();
+#P Core - Core Automation
+Index: src/com/enactor/core/automation/AUT/AUTConfig.java
+===================================================================
+--- src/com/enactor/core/automation/AUT/AUTConfig.java	(revision 1416062)
++++ src/com/enactor/core/automation/AUT/AUTConfig.java	(working copy)
+@@ -34,6 +34,8 @@
+     public static final String PROPERTY_DELIMETER = ",";
+     /** Aut controller server list **/
+     public static final String PROPERTY_AUT_LIST = "autList";
++    /** Test parameter for the end screen **/
++    public static final String PROPERTY_WINDOW_TO_CHECK = "windowToCheck";
+     /**
+      * Instance.
+      */
+
